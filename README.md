@@ -1,5 +1,5 @@
 # Banco de dados aleatório 
-O banco de dados para o projeto [dash_pacientes] (https://github.com/GodoyTO/dash_pacientes) foi extraído da página [FAKE NAME GENERATOR] (https://www.fakenamegenerator.com/order.php) usando os preset:
+O banco de dados para o projeto [dash_pacientes](https://github.com/GodoyTO/dash_pacientes) foi extraído da página [FAKE NAME GENERATOR](https://www.fakenamegenerator.com/order.php) usando os preset:
 
 Name sets: Arabic, Brazil, Chinese, Czech, Eritrean, Finnish, French, German, Hispanic, Igbo, Italian, Japanese (Anglicized), Scottish, Vietnamese
 
