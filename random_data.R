@@ -80,3 +80,5 @@ ds <- ds %>%
         )
     )
 
+write_csv2(ds, 'dash_ds.csv')
+saveRDS(ds, 'dash_ds.rds')
