@@ -70,6 +70,40 @@ ds <- ds %>%
     group_modify(~slice_sample(.x, prop = slice[.y$group])) %>%
     ungroup() %>% select(-group)
 
+
+ds <- ds %>%
+    rowwise() %>%
+    mutate(nm_race = case_when(
+        nm_ethn == "Arabic"     ~ "Middle Eastern or North African",
+        nm_ethn == "Brazil"     ~ sample(c("Black", "White", "Native American",
+                                           "Asian"), size = 1,
+                                         prob = c(0.50, 0.35, 0.10, 0.05)),
+        nm_ethn == "Chinese"    ~ "Asian",
+        nm_ethn == "Czech"      ~ "White",
+        nm_ethn == "Eritrean"   ~ sample(c("Black", "Middle Eastern or North African"),
+                                         size = 1, prob = c(0.5, 0.5)),
+        nm_ethn == "Finnish"    ~ "White",
+        nm_ethn == "French"     ~ sample(c("Black", "White"), size = 1,
+                                         prob = c(0.15, 0.85)),
+        nm_ethn == "German"     ~ sample(c("Black", "White",
+                                           "Middle Eastern or North African",
+                                           "Asian"), size = 1,
+                                         prob = c(0.05, 0.75, 0.15, 0.05)),
+        nm_ethn == "Hispanic"   ~ sample(c("Black", "White", "Native American",
+                                           "Asian"), size = 1,
+                                         prob = c(0.35, 0.40, 0.20, 0.05)),
+        nm_ethn == "Igbo"       ~ "Black",
+        nm_ethn == "Italian"    ~ sample(c("White", "Middle Eastern or North African"),
+                                         size = 1, prob = c(0.85, 0.15)),
+        nm_ethn == "Japanese"   ~ "Asian",
+        nm_ethn == "Scottish"   ~ sample(c("Black", "White",
+                                           "Middle Eastern or North African", "Asian"),
+                                         size = 1, prob = c(0.05, 0.75, 0.10, 0.10)),
+        nm_ethn == "Vietnamese" ~ "Asian",
+        TRUE                    ~ "Uknown"
+    ), .after = nm_ethn) %>%
+    ungroup()
+
 ds <- ds %>% 
     mutate(
         cd_cpf = case_when(
