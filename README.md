@@ -16,4 +16,5 @@ Todos os campos foram incluídos, exceto Weight(pounds) e Height(feet/inches)
 Após essa extração ele foi tratado selecionando um subset de variáveis de interesse (nome, idade, cidade, lat e long) 
 ou que poderiam ser usadas para criar outras variáveis (veículo, companhia, signo, cor, etc.)
 
-Além disso ele foi cortado para representar uma pirâmide etária específica
+Além disso ele foi cortado para representar uma pirâmide etária específica e uma coluna de raça foi adicionada além da coluna de etinicidade. Essa coluna de raça foi criada a partir de probabilidades para cada caso de etnicidade diferente.
+
