@@ -100,9 +100,20 @@ ds <- ds %>%
                                            "Middle Eastern or North African", "Asian"),
                                          size = 1, prob = c(0.05, 0.75, 0.10, 0.10)),
         nm_ethn == "Vietnamese" ~ "Asian",
-        TRUE                    ~ "Uknown"
+        TRUE                    ~ "Unknown"
     ), .after = nm_ethn) %>%
     ungroup()
+
+ds <- ds %>%
+    mutate(stage = str_count(occupation, "\\w+"), .after = long) %>% 
+    mutate(stage = case_when(
+        stage == 1 ~ "Stage 3",
+        stage == 2 ~ "Stage 1",
+        stage == 3 ~ "Stage 2",
+        stage %in% c(4,5)  ~ "Stage 4",
+        stage > 5 ~ "Stage 5"
+    ))
+
 
 ds <- ds %>% 
     mutate(
