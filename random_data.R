@@ -39,24 +39,19 @@ ds <- ds %>%
         stage > 5 ~ "Stage 5"
     ))
 
-# Creating date of diagnosis variable
+# Creating relationship between nm_sign and the actual months
+sign_month <- c(
+    "Aries" = 4, "Taurus" = 5, "Gemini" = 6, "Cancer" = 7,
+    "Leo" = 8, "Virgo" = 9, "Libra" = 10, "Scorpio" = 11,
+    "Sagittarius" = 12, "Capricorn" = 1, "Aquarius" = 2, "Pisces" = 3)
+
+# Creating date of diagnosis variable using nm_sign and vehicle
 ds <- ds %>%
-    mutate(dt_diag = str_extract(vehicle, "^\\w+") %>% as.integer()+7,
-           .after = stage) %>% 
-    mutate(dt_diag = case_when(
-        nm_sign == "Aries"       ~ ymd(paste0(dt_diag, "-04-01")),
-        nm_sign == "Taurus"      ~ ymd(paste0(dt_diag, "-05-01")),
-        nm_sign == "Gemini"      ~ ymd(paste0(dt_diag, "-06-01")),
-        nm_sign == "Cancer"      ~ ymd(paste0(dt_diag, "-07-01")),
-        nm_sign == "Leo"         ~ ymd(paste0(dt_diag, "-08-01")),
-        nm_sign == "Virgo"       ~ ymd(paste0(dt_diag, "-09-01")),
-        nm_sign == "Libra"       ~ ymd(paste0(dt_diag, "-10-01")),
-        nm_sign == "Scorpio"     ~ ymd(paste0(dt_diag, "-11-01")),
-        nm_sign == "Sagittarius" ~ ymd(paste0(dt_diag, "-12-01")),
-        nm_sign == "Capricorn"   ~ ymd(paste0(dt_diag, "-01-01")),
-        nm_sign == "Aquarius"    ~ ymd(paste0(dt_diag, "-02-01")),
-        nm_sign == "Pisces"      ~ ymd(paste0(dt_diag, "-03-01"))
-    ))
+    mutate(
+        year    = as.integer(str_extract(vehicle, "^\\w+")) + 7,
+        month   = sign_month[nm_sign],
+        dt_diag = make_date(year = year, month = month, day = 1),
+        .after  = stage ) %>% select(-year, -month)
 
 # Standardizing age variable and fixing dates of diagnosis before births
 ds <- ds %>%
