@@ -60,19 +60,23 @@ ds <- ds %>%
 
 # Standardizing age variable and fixing dates of diagnosis before births
 ds <- ds %>%
-    mutate(nu_age = time_length(interval(dt_birth, Sys.Date()), "years") %>%
-               floor(),
-           nu_age_diag = time_length(interval(dt_birth, dt_diag), "years"),
-           .after = nu_age) %>% 
-    mutate(dt_diag = case_when(
-        nu_age_diag <   0 & nu_age_diag >=  -5 ~dt_diag %m+% years( 5),
-        nu_age_diag <  -5 & nu_age_diag >= -10 ~dt_diag %m+% years(10),
-        nu_age_diag < -10 & nu_age_diag >= -15 ~dt_diag %m+% years(15),
-        nu_age_diag < -15 & nu_age_diag >= -20 ~dt_diag %m+% years(20),
-        nu_age_diag < -20 & nu_age_diag >= -25 ~dt_diag %m+% years(25),
-        nu_age_diag < -25 & nu_age_diag >= -30 ~dt_diag %m+% years(30),
-        T                                      ~dt_diag),
-    nu_age_diag = time_length(interval(dt_birth, dt_diag), "years"))
+    mutate(
+        nu_age = (as.numeric(difftime(
+            ymd("2026-02-13"), dt_birth, units = "days")) / 365.25) %>% floor(),
+        nu_age_diag = as.numeric(difftime(
+            dt_diag, dt_birth, units = "days")) / 365.25,
+        .after = nu_age) 
+
+ds <- ds %>%
+    mutate(fix_year = if_else(
+        nu_age_diag < 0 & nu_age_diag >= -30, 
+        ceiling(abs(nu_age_diag) / 5) * 5, 
+        0))
+
+ds <- ds %>%
+    mutate(dt_diag = dt_diag %m+% years(fix_year),
+           nu_age_diag = (as.numeric(difftime(
+               dt_diag, dt_birth, units = "days")) / 365.25) %>% floor())
 
 # Creating full name variable
 ds <- ds %>% 
