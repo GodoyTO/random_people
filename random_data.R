@@ -100,9 +100,38 @@ ds <- ds %>%
                                            "Middle Eastern or North African", "Asian"),
                                          size = 1, prob = c(0.05, 0.75, 0.10, 0.10)),
         nm_ethn == "Vietnamese" ~ "Asian",
-        TRUE                    ~ "Uknown"
+        TRUE                    ~ "Unknown"
     ), .after = nm_ethn) %>%
     ungroup()
+
+ds <- ds %>%
+    mutate(stage = str_count(occupation, "\\w+"), .after = long) %>% 
+    mutate(stage = case_when(
+        stage == 1 ~ "Stage 3",
+        stage == 2 ~ "Stage 1",
+        stage == 3 ~ "Stage 2",
+        stage %in% c(4,5)  ~ "Stage 4",
+        stage > 5 ~ "Stage 5"
+    ))
+
+ds <- ds %>%
+    mutate(dt_diag = str_extract(vehicle, "^\\w+") %>% as.integer()+7,
+           .after = stage) %>% 
+    mutate(dt_diag = case_when(
+        nm_sign == "Aries"       ~ paste0(dt_diag, "-04"),
+        nm_sign == "Taurus"      ~ paste0(dt_diag, "-05"),
+        nm_sign == "Gemini"      ~ paste0(dt_diag, "-06"),
+        nm_sign == "Cancer"      ~ paste0(dt_diag, "-07"),
+        nm_sign == "Leo"         ~ paste0(dt_diag, "-08"),
+        nm_sign == "Virgo"       ~ paste0(dt_diag, "-09"),
+        nm_sign == "Libra"       ~ paste0(dt_diag, "-10"),
+        nm_sign == "Scorpio"     ~ paste0(dt_diag, "-11"),
+        nm_sign == "Sagittarius" ~ paste0(dt_diag, "-12"),
+        nm_sign == "Capricorn"   ~ paste0(dt_diag, "-01"),
+        nm_sign == "Aquarius"    ~ paste0(dt_diag, "-02"),
+        nm_sign == "Pisces"      ~ paste0(dt_diag, "-03")
+    ))
+
 
 ds <- ds %>% 
     mutate(
