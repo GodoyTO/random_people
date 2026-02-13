@@ -1,9 +1,12 @@
 if(!require(tidyverse)) install.packages('tidyverse'); require(tidyverse)
 
+# Setting the set for reproducibility
 set.seed(0)
 
+# Loading original dataset
 ds_original <- read_csv("FakeNameGenerator.com_f469bbf6.csv")
 
+# Cleaning names and setting snake_cases
 ds <- ds_original %>% 
     rename_with(~str_to_lower(str_replace_all(., "([a-z])([A-Z])", "\\1_\\2"))) %>% 
     select(cd_pac = number, tp_sex = gender, nm_ethn = name_set,
@@ -17,15 +20,16 @@ ds <- ds_original %>%
            email_address, username, password, guid
            )
 
+# Setting pacient code, type sex, fixing names and dates
 ds <- ds %>% 
     mutate(
         cd_pac   = sprintf("%06d", cd_pac),
         tp_sex   = if_else(tp_sex  == 'female', 'F', 'M'),
         nm_ethn  = if_else(nm_ethn == 'Japanese (Anglicized)', 'Japanese', nm_ethn),
         dt_birth = mdy(dt_birth) %m-% years(5),
-        nu_cc    = as.character(nu_cc)
-    )
+        nu_cc    = as.character(nu_cc))
 
+# Creating stage variable
 ds <- ds %>%
     mutate(stage = str_count(occupation, "\\w+"), .after = long) %>% 
     mutate(stage = case_when(
@@ -36,6 +40,7 @@ ds <- ds %>%
         stage > 5 ~ "Stage 5"
     ))
 
+# Creating date of diagnosis variable
 ds <- ds %>%
     mutate(dt_diag = str_extract(vehicle, "^\\w+") %>% as.integer()+7,
            .after = stage) %>% 
@@ -54,7 +59,7 @@ ds <- ds %>%
         nm_sign == "Pisces"      ~ ymd(paste0(dt_diag, "-03-01"))
     ))
 
-
+# Standardizing age variable and fixing dates of diagnosis before births
 ds <- ds %>%
     mutate(nu_age = time_length(interval(dt_birth, Sys.Date()), "years") %>%
                floor(),
@@ -70,10 +75,12 @@ ds <- ds %>%
         T                                      ~dt_diag),
     nu_age_diag = time_length(interval(dt_birth, dt_diag), "years"))
 
+# Creating full name variable
 ds <- ds %>% 
     mutate(nm_full = paste(nm_first, nm_middle, nm_last), .after = tp_sex) %>% 
     select(-c(nm_first, nm_middle, nm_last))
 
+# Creating age groups
 ds <- ds %>% 
     mutate(age_group = factor(case_when(
         between(nu_age,  0,  9)  ~ '00 to 09 year',
@@ -98,6 +105,7 @@ ds <- ds %>%
 #     '60 to 69 year' = 1.00, '70 to 79 year' = 0.95, '80 to 89 year' = 0.75,
 #     '90 or more' = 0.55)
 
+# Slice array to subset the dataset for a more natural population pyramid
 slice <- c(
     '00 to 09 yearM' = 0.05, '10 to 19 yearM' = 0.20, '20 to 29 yearM' = 0.50,
     '30 to 39 yearM' = 0.70, '40 to 49 yearM' = 0.80, '50 to 59 yearM' = 0.90,
@@ -108,13 +116,14 @@ slice <- c(
     '60 to 69 yearF' = 0.95, '70 to 79 yearF' = 0.85, '80 to 89 yearF' = 0.65,
     '90 or moreF' = 0.45)
 
+# Slicing the dataset for age_group
 ds <- ds %>%
     mutate(group = paste0(age_group, tp_sex)) %>% 
     group_by(group) %>%
     group_modify(~slice_sample(.x, prop = slice[.y$group])) %>%
     ungroup() %>% select(-group)
 
-
+# Creating race variable
 ds <- ds %>%
     rowwise() %>%
     mutate(nm_race = case_when(
@@ -148,11 +157,16 @@ ds <- ds %>%
     ), .after = nm_ethn) %>%
     ungroup()
 
+# Checking CPF duplication
+ds %>% select(cd_pac, cd_cpf) %>% 
+    filter(duplicated(cd_cpf) | duplicated(cd_cpf, fromLast = T))
+ 
+# Fixing CPF numbers to end variable duplication
 ds <- ds %>% 
     mutate(
         cd_cpf = case_when(
-            cd_pac == '078516' ~ '566.229.886-68',
-            cd_pac == '081699' ~ '610.280.257-85',
+            # cd_pac == '078516' ~ '566.229.886-68',
+            # cd_pac == '081699' ~ '610.280.257-85',
             cd_pac == '091076' ~ '917.288.867-91',
             T ~ cd_cpf
         )
