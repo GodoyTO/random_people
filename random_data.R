@@ -20,10 +20,9 @@ ds <- ds_original %>%
            email_address, username, password, guid
            )
 
-# Setting pacient code, type sex, fixing names and dates
+# Setting type sex, fixing names and dates
 ds <- ds %>% 
     mutate(
-        cd_pac   = sprintf("%06d", cd_pac),
         tp_sex   = if_else(tp_sex  == 'female', 'F', 'M'),
         nm_ethn  = if_else(nm_ethn == 'Japanese (Anglicized)', 'Japanese', nm_ethn),
         dt_birth = mdy(dt_birth) %m-% years(5),
@@ -156,6 +155,12 @@ ds <- ds %>%
         TRUE                    ~ "Unknown"
     ), .after = nm_ethn) %>%
     ungroup()
+
+# Setting patient code based in date of diagnosis
+ds <- ds %>%
+    arrange(dt_diag) %>% 
+    mutate(cd_pac = sprintf("%06d", row_number()))
+
 
 # Checking CPF duplication
 ds %>% select(cd_pac, cd_cpf) %>% 
