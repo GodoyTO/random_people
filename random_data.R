@@ -132,7 +132,7 @@ ds <- ds %>%
         nm_ethn == "Japanese"   ~ "Asian",
         nm_ethn == "Vietnamese" ~ "Asian",
         TRUE                    ~ NA_character_
-    ))
+    ), .after = nm_ethn)
 
 # Sample function to choose the race
 ds <- ds %>%
@@ -171,7 +171,7 @@ ds <- ds %>%
             replace = T, prob = c(0.05, 0.75, 0.10, 0.10)),
         
         TRUE                    ~ "Unknown"
-    ), .after = nm_ethn) %>%
+    )) %>%
     ungroup()
 
 # Setting patient code based in date of diagnosis
